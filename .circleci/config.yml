@@ -322,7 +322,7 @@ jobs: #now we will bbuild our jobs
       - restore_cache:
           keys: [backend-deps]
       - run:
-          name:
+          name: a
           command: |
             cd backend
             npm install
@@ -456,10 +456,10 @@ workflows:  # create workflows
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
