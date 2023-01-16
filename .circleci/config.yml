@@ -250,6 +250,7 @@ jobs: #now we will bbuild our jobs
             name: Run migrations
             command: |
               cd backend
+              npm install
               npm run migrations > migration_status
               # npm install 
               # npm run build
