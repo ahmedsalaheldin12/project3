@@ -384,7 +384,8 @@ jobs: #now we will bbuild our jobs
             else
               exit 1
             fi 
-      # - destroy-environment 
+      # - destroy-environment
+       
       - revert-migrations
   cloudfront-update: # create cloudfront-update
     docker:
