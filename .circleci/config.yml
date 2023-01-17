@@ -384,8 +384,7 @@ jobs: #now we will bbuild our jobs
             else
               exit 1
             fi 
-      # - destroy-environment
-
+      - destroy-environment 
       - revert-migrations
   cloudfront-update: # create cloudfront-update
     docker:
@@ -436,7 +435,6 @@ jobs: #now we will bbuild our jobs
             else
               echo cant clean
             fi
-            
 
 workflows:  # create workflows
   my-workflow:
@@ -470,4 +468,3 @@ workflows:  # create workflows
           requires: [smoke-test]
       - cleanup:
           requires: [cloudfront-update]
-
