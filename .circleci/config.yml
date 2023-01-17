@@ -233,7 +233,7 @@ jobs: #now we will bbuild our jobs
 
   run-migrations:
       docker:
-        - image: cimg/node:19.3.0
+        - image: cimg/node:13.8.0
       steps:
         - checkout
         - restore_cache:
@@ -345,7 +345,7 @@ jobs: #now we will bbuild our jobs
             # export TYPEORM_MIGRATIONS_DIR=./migrations
             # export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
             # export TYPEORM_MIGRATIONS=./migrations/*.ts
-            
+
             export TYPEORM_MIGRATIONS_DIR=./backend-artifact/dist/migrations
             export TYPEORM_ENTITIES=./backend-artifact/dist/modules/domain/*/.entity{.ts,.js}
             export TYPEORM_MIGRATIONS=./backend-artifact/dist/migrations/*.ts
