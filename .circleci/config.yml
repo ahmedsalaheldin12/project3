@@ -43,7 +43,7 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            SUCCESS=$(curl --insecure  https://kvdb.io/87JQfzEZQhFPYRJcCjaD2B/migration_<< parameters.Workflow_ID >>)
+            SUCCESS=$(curl --insecure  https://kvdb.io/bKU3mipVDbGVNDPaGLDqh/migration_<< parameters.Workflow_ID >>)
             # Logic for reverting the database state
             if (( $SUCCESS == 1 ));
             then
@@ -231,37 +231,68 @@ jobs: #now we will bbuild our jobs
             ansible-playbook .circleci/ansible/configure-server.yml -i .circleci/ansible/inventory.txt
       - destroy-environment
 
+  # run-migrations:
+  #     docker:
+  #       - image: cimg/node:19.3.0
+  #     steps:
+  #       - checkout
+  #       - restore_cache:
+  #           keys: [backend-build]
+  #       - run: 
+  #           name: Install aws cli
+  #           command: |
+  #             #test
+  #             sudo apt-get update && sudo apt-get install -yy less
+  #             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  #             unzip awscliv2.zip
+  #             sudo ./aws/install  
+  #       - run:
+  #           name: Run migrations
+  #           command: |
+  #             cd backend
+  #             npm install
+  #             npm run migrations > migrations_dump.txt
+  #             # npm install 
+  #             # npm run build
+  #             # npm run migrations > migrations_dump.txt
+  #       - run:
+  #           name: Send migration results to memstash
+  #           command: |
+  #             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+  #             then
+  #                 # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
+  #                 curl https://kvdb.io/bKU3mipVDbGVNDPaGLDqh/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+  #             fi
+  #       - revert-migrations
+  #       - destroy-environment
+
   run-migrations:
       docker:
-        - image: cimg/node:19.3.0
+        - image: python:3.7-alpine3.16
       steps:
         - checkout
+
+        - run: 
+            name: Install dep 
+            command: |
+              apk add --update --no-chache tar gzip nodejs npm aws-cli curl
+
         - restore_cache:
             keys: [backend-build]
-        - run: 
-            name: Install aws cli
-            command: |
-              #test
-              sudo apt-get update && sudo apt-get install -yy less
-              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-              unzip awscliv2.zip
-              sudo ./aws/install  
         - run:
             name: Run migrations
             command: |
               cd backend
               npm install
+              npm run build
               npm run migrations > migrations_dump.txt
-              # npm install 
-              # npm run build
-              # npm run migrations > migrations_dump.txt
         - run:
             name: Send migration results to memstash
             command: |
               if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
               then
                   # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
-                  curl https://kvdb.io/87JQfzEZQhFPYRJcCjaD2B/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+                  curl https://kvdb.io/bKU3mipVDbGVNDPaGLDqh/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
               fi
         - revert-migrations
         - destroy-environment
@@ -398,7 +429,7 @@ jobs: #now we will bbuild our jobs
             yum install -y curl
             export OLD_WORKFLOW_ID=$(aws cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
             echo "Old Wokflow ID: $OLD_WORKFLOW_ID"
-            curl https://kvdb.io/87JQfzEZQhFPYRJcCjaD2B/old_workflow_id-2 -d "${CIRCLE_WORKFLOW_ID:0:7}"
+            curl https://kvdb.io/bKU3mipVDbGVNDPaGLDqh/old_workflow_id-2 -d "${CIRCLE_WORKFLOW_ID:0:7}"
   
       - run:
           name: Update cloudfront distribution
@@ -420,7 +451,7 @@ jobs: #now we will bbuild our jobs
           name: Remove old stacks and files
           command: |
             yum install -y curl         
-            export OLDWORKFLOWID=$(curl --insecure https://kvdb.io/87JQfzEZQhFPYRJcCjaD2B/old_workflow_id-2)
+            export OLDWORKFLOWID=$(curl --insecure https://kvdb.io/bKU3mipVDbGVNDPaGLDqh/old_workflow_id-2)
             echo Old Workflow ID: $OLDWORKFLOWID 
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
             # Fetch the stack names 
@@ -440,32 +471,33 @@ jobs: #now we will bbuild our jobs
 workflows:  # create workflows
   my-workflow:
     jobs:
-      - build-frontend
-      - build-backend
-      - test-frontend:
-          requires: [build-frontend]
-      - test-backend:
-          requires: [build-backend]
-      - scan-backend:
-          requires: [build-backend]
-      - scan-frontend:
-          requires: [build-frontend]
-      - deploy-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-          filters:
-            branches:
-              only: [master]
+      # - build-frontend
+      # - build-backend
+      # - test-frontend:
+      #     requires: [build-frontend]
+      # - test-backend:
+      #     requires: [build-backend]
+      # - scan-backend:
+      #     requires: [build-backend]
+      # - scan-frontend:
+      #     requires: [build-frontend]
+      - deploy-infrastructure
+      # - deploy-infrastructure:
+          # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          # filters:
+          #   branches:
+          #     only: [master]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
-      - deploy-frontend:
-          requires: [run-migrations]
-      - deploy-backend:
-          requires: [run-migrations]
-      - smoke-test:
-          requires: [deploy-backend, deploy-frontend]
-      - cloudfront-update:
-          requires: [smoke-test]
-      - cleanup:
-          requires: [cloudfront-update]
+      # - deploy-frontend:
+      #     requires: [run-migrations]
+      # - deploy-backend:
+      #     requires: [run-migrations]
+      # - smoke-test:
+      #     requires: [deploy-backend, deploy-frontend]
+      # - cloudfront-update:
+      #     requires: [smoke-test]
+      # - cleanup:
+      #     requires: [cloudfront-update]
