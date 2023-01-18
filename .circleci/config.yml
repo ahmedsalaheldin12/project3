@@ -330,6 +330,7 @@ jobs: #now we will bbuild our jobs
           command: |
             cd backend
             npm install
+            
       - run:
           name: Package backend
           command: |
