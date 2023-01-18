@@ -347,10 +347,6 @@ jobs: #now we will bbuild our jobs
             export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
             export TYPEORM_MIGRATIONS=./migrations/*.ts
 
-            # export TYPEORM_MIGRATIONS_DIR=./backend-artifact/dist/migrations
-            # export TYPEORM_ENTITIES=./backend-artifact/dist/modules/domain/*/.entity{.ts,.js}
-            # export TYPEORM_MIGRATIONS=./backend-artifact/dist/migrations/*.ts
-
             cd .circleci/ansible
             echo "Contents  of the inventory file is -------"
             cat inventory.txt
