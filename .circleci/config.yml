@@ -330,7 +330,7 @@ jobs: #now we will bbuild our jobs
           command: |
             cd backend
             npm install
-            
+
       - run:
           name: Package backend
           command: |
@@ -340,6 +340,7 @@ jobs: #now we will bbuild our jobs
 
             cd .. 
             cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files
+            
             
       - run:
           name: Deploy backend
