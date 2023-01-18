@@ -162,9 +162,9 @@ jobs: #now we will bbuild our jobs
           command: |
             cd backend
             npm install
-            # npm audit fix --force --audit-level=critical
-            # npm audit fix --force --audit-level=critical
-            npm audit --audit-level=critical
+            npm audit fix --force --audit-level=critical
+            npm audit fix --force --audit-level=critical
+            #npm audit --audit-level=critical
       - slack/notify:
           channel: df
           event: fail
@@ -452,13 +452,13 @@ workflows:  # create workflows
           requires: [build-backend]
       - scan-backend:
           requires: [build-backend]
-#       - scan-frontend:
-#           requires: [build-frontend]
-#       - deploy-infrastructure:
-#           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-#           filters:
-#             branches:
-#               only: [master]
+      - scan-frontend:
+          requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [master]
 #       - configure-infrastructure:
 #           requires: [deploy-infrastructure]
 #       - run-migrations:
