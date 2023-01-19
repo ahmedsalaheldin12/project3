@@ -1,11 +1,11 @@
 GitHub repository : https://github.com/ahmedsalaheldin12/project3
 
-S3 Bucket: http://udapeople-9b76bdb.s3-website-us-east-1.amazonaws.com
+S3 Bucket: http://udapeople-cd93ec5.s3-website-us-east-1.amazonaws.com
 
 
-cloudfront url : d1099auilyg3s9.cloudfront.net
+cloudfront url : http://d1099auilyg3s9.cloudfront.net/#/employees
 
 endpoint for database : db1.cizss1nzs8eo.us-east-1.rds.amazonaws.com
 
 
-url for promesues: http://44.204.4.133:9090/targets
+url for promesues: http://52.87.93.244:9090/targets
