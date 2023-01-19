@@ -389,7 +389,7 @@ jobs: #now we will bbuild our jobs
             echo ${URL} 
             if curl -s ${URL} | grep "Welcome"
             then
-              exit 1
+              exit 0
             else
               exit 1
             fi 
@@ -435,15 +435,30 @@ jobs: #now we will bbuild our jobs
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
             --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
             echo Stack names: "${STACKS[@]}"          
-            if [[ udapeople-${WorkflowID} =~ ${OLDWORKFLOWID} ]]
+            #if [[ udapeople-${WorkflowID} =~ ${OLDWORKFLOWID} ]]
+            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+
             then
               aws s3 rm "s3://udapeople-${OLDWORKFLOWID}" --recursive
               aws cloudformation delete-stack --stack-name "udapeople-backend-${OLDWORKFLOWID}"
               aws cloudformation delete-stack --stack-name "udapeople-frontend-${OLDWORKFLOWID}"
               echo cleaning confirmed
-            else
-              echo cant clean
             fi
+
+          # name: Remove old stacks and files
+          # command: |
+          #   export STACKS=($(aws cloudformation list-stacks \
+          #       --query "StackSummaries[*].StackName" \
+          #       --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
+          #   echo Stack names: "${STACKS[@]}"
+          #   export OldWorkflowID=$(curl --insecure https://kvdb.io/${KVDB_BUCKET}/old_workflow_id)
+          #   echo Old Workflow ID: $OldWorkflowID 
+          #   if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+          #   then
+          #     aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+          #     aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
+          #     aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
+          #   fi
 
 workflows:  # create workflows
   my-workflow:
@@ -473,7 +488,7 @@ workflows:  # create workflows
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
-      # - cloudfront-update:
-      #     requires: [smoke-test]
-      # - cleanup:
-      #     requires: [cloudfront-update]
+      - cloudfront-update:
+          requires: [smoke-test]
+      - cleanup:
+          requires: [cloudfront-update]
