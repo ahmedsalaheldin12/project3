@@ -41,15 +41,16 @@ commands:
     steps:
       - run:
           name: Revert migrations
+          working_directory: ./backend
           when: on_fail
           command: |
-            SUCCESS=$(curl --insecure  https://kvdb.io/GFTwRVCK6ALARUYUsXLMvL/migration_<< parameters.Workflow_ID >>)
+            SUCCESS=$(curl --insecure  https://kvdb.io/Q1ADksBkwwgfG3WFgu2sEb/migration_<< parameters.Workflow_ID >>)
 
 
             # Logic for reverting the database state
             if (( $SUCCESS == 1 ));
             then
-              cd ~/projects/backend
+              #cd ~/projects/backend
               npm install
               npm run migration:revert
             fi
@@ -264,7 +265,7 @@ jobs: #now we will bbuild our jobs
               if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
               then
                   # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
-                  curl https://kvdb.io/GFTwRVCK6ALARUYUsXLMvL/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+                  curl https://kvdb.io/Q1ADksBkwwgfG3WFgu2sEb/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
               fi
         - destroy-environment
         - revert-migrations
@@ -406,7 +407,7 @@ jobs: #now we will bbuild our jobs
             yum install -y curl
             export OLD_WORKFLOW_ID=$(aws cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
             echo "Old Wokflow ID: $OLD_WORKFLOW_ID"
-            curl https://kvdb.io/GFTwRVCK6ALARUYUsXLMvL/old_workflow_id-2 -d "${CIRCLE_WORKFLOW_ID:0:7}"
+            curl https://kvdb.io/Q1ADksBkwwgfG3WFgu2sEb/old_workflow_id-2 -d "${CIRCLE_WORKFLOW_ID:0:7}"
   
       - run:
           name: Update cloudfront distribution
@@ -428,7 +429,7 @@ jobs: #now we will bbuild our jobs
           name: Remove old stacks and files
           command: |
             yum install -y curl         
-            export OLDWORKFLOWID=$(curl --insecure https://kvdb.io/GFTwRVCK6ALARUYUsXLMvL/old_workflow_id-2)
+            export OLDWORKFLOWID=$(curl --insecure https://kvdb.io/Q1ADksBkwwgfG3WFgu2sEb/old_workflow_id-2)
             echo Old Workflow ID: $OLDWORKFLOWID 
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
             # Fetch the stack names 
@@ -448,35 +449,35 @@ jobs: #now we will bbuild our jobs
 
  
 
-# workflows:  # create workflows
-#   my-workflow:
-#     jobs:
-#       - build-frontend
-#       - build-backend
-#       - test-frontend:
-#           requires: [build-frontend]
-#       - test-backend:
-#           requires: [build-backend]
-#       - scan-backend:
-#           requires: [build-backend]
-#       - scan-frontend:
-#           requires: [build-frontend]
-#       - deploy-infrastructure:
-#           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-#           filters:
-#             branches:
-#               only: [master]
-#       - configure-infrastructure:
-#           requires: [deploy-infrastructure]
-#       - run-migrations:
-#           requires: [configure-infrastructure]
-#       - deploy-frontend:
-#           requires: [run-migrations]
-#       - deploy-backend:
-#           requires: [run-migrations]
-#       - smoke-test:
-#           requires: [deploy-backend, deploy-frontend]
-#       - cloudfront-update:
-#           requires: [smoke-test]
-#       - cleanup:
-#           requires: [cloudfront-update]
+workflows:  # create workflows
+  my-workflow:
+    jobs:
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [master]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
+      - cloudfront-update:
+          requires: [smoke-test]
+      - cleanup:
+          requires: [cloudfront-update]
