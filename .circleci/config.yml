@@ -437,7 +437,6 @@ jobs: #now we will bbuild our jobs
             echo Stack names: "${STACKS[@]}"          
             if [[ udapeople-${WorkflowID} =~ ${OLDWORKFLOWID} ]]
             #if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
-
             then
               aws s3 rm "s3://udapeople-${OLDWORKFLOWID}" --recursive
               aws cloudformation delete-stack --stack-name "udapeople-backend-${OLDWORKFLOWID}"
